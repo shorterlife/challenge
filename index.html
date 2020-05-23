@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Life is short</title>
+    <meta name=viewport content="width=device-width, initial-scale=1">
+    <meta name="twitter:card" content="summary_large_image" /> 
+    <meta name="twitter:title" content="Life is Short" /> 
+    <meta name="twitter:description" content="Game of Life in html/javascript, a journey from nice and readable to 203 chars total." /> 
+    <meta name="twitter:image" content="screenshot.png" />    
+    <link rel="shortcut icon" href="favicon.ico">
+    <style>
+        #comment {
+            position: absolute; 
+            top: 15px;
+            left: 10px;
+            margin-bottom: 0; 
+            color:red; 
+            transform: rotate(-10deg); 
+            font-size: x-large;
+        }
+
+        @media screen and (max-width: 512px) {
+            #comment {
+                font-style: italic;
+                position: relative;
+                top: unset;
+                left: unset;
+                transform: unset;
+                font-size: x-large;
+            }
+        }        
+    </style>
+</head>
+<body>
+
+    <div id="rules" 
+         style="display:none; position:absolute; top:10px; right: 10px; padding:10px; background-color: rgba(255, 255, 255, 0.95); border-style: solid; border-width: 1px; box-shadow: 4px 4px rgba(192, 192, 192, 0.7); z-index: 99;"
+         onclick="toggleRules()">
+        <ul>
+            <li>It must follow the B3/S23 game of life <a href="https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life#Rules" target="_blank">rules</a></li>
+            <li>The board must be at least 50x50 with a TRUE torus topology</li>
+            <li>The board must be initialized randomly and animated on screen</li>
+            <li>The code must be Javascript in a single html file with no dependencies</li>
+            <li>The code must be short. <a href="https://github.com/shorterlife/challenge/blob/master/life.html" target="_blank">Help us make it shorter!</a></li>
+        </ul>
+    </div>
+
+    <div style="text-align: center;">
+        <h2 style="padding-bottom: 0; margin-bottom: 0;font-size: 1.4em; font-family: 'Consolas', Courier, monospace;">Conway's Game of Life <sup><a href="javascript:toggleRules()">[?]</a></sup></h2>
+        <h3 style="padding-top: 5px; margin-top: 0; font-family: 'Consolas', Courier, monospace;">
+            Iteration: <span id="iteration" style="min-width: 45px; text-align: right; display: inline-block"></span>, 
+            Length: <span id="codelen" style="min-width: 45px; text-align: right; display: inline-block"></span>
+            <br />
+            <a style="text-decoration: none;" href="javascript:change(-1000)">|&lt;</a>&nbsp;
+            <a style="text-decoration: none;" href="javascript:change(-1)">&lt;</a>&nbsp;
+            <a style="text-decoration: none;" href="javascript:pause()">||</a>&nbsp;
+            <a style="text-decoration: none;" href="javascript:change(1)">&gt;</a>&nbsp;
+            <a style="text-decoration: none;" href="javascript:change(1000)">&gt;|</a>
+        </h3>
+    </div>
+
+    <div id="comment"></div>
+
+    <div id="code" style="border-style: solid; padding: 8px; margin-bottom: 10px; font-family: 'Consolas', Courier, monospace;white-space: pre-wrap;word-break: break-all;background-color: black; color: lightgray;">
+        code
+    </div>
+
+    <iframe style="border-style: none;" width="100%" height="800px" id="demo"></iframe>
+
+    <script>
+        const log = [   
+            ["Initial",                     "<html>\n<body>\n    <canvas id=\"grid\" width=\"500\" height=\"500\" style=\"border-style: solid;\" />\n    <script>\n        let C = 10, N = 50, B = 83, Z = 5, R = 0.1;\n        let ctx = document.getElementById(\"grid\").getContext(\"2d\");\n\n        let g = new Array(N * N);\n        for (let i = 0; i < N * N; i++) {\n            g[i] = Math.random() <= R ? B : 0;\n        }\n\n        setInterval(\n            function () {\n                update();\n            }, 100);\n\n        function update() {\n            let ng = new Array(N * N);\n            for (let i = 0; i < N * N; i++) {\n                let S = 0;\n                for (let z = 0; z < 9; z++) {\n                    S += (z === 4 ? 8 : 1) * (\n                        g[N * ((N + Math.floor(i / N) + z % 3 - 1) % N) + \n                        (N + i % N + Math.floor(z / 3) - 1) % N] < B ? 0 : 1);\n                }\n                ng[i] = S % 7 == 3 || S == 11 ? B : Math.max(0, g[i] - Z);\n                let s = ng[i] * (ng[i] === B ? 3 : 1);\n                ctx.fillStyle = \"rgb(\" + s + \",\" + s + \",\" + s + \")\"\n                ctx.fillRect(i % N * C, Math.floor(i / N) * C, C, C);\n            }\n            g = ng;\n        }\n    </ script>\n</body>\n</html>"],
+            ["Who needs spaces?",           "<html><body><canvas id=\"grid\" width=\"500\" height=\"500\" style=\"border-style:solid;\"/><script>let C=10,N=50,B=83,Z=5,R=0.1;let ctx=document.getElementById(\"grid\").getContext(\"2d\");let g=new Array(N*N);for(let i=0;i<N*N;i++){g[i]=Math.random()<=R?B:0;}setInterval(function(){update();},100);function update(){let ng=new Array(N*N);for(let i=0;i<N*N;i++){let S=0;for(let z=0;z<9;z++){S+=(z===4?8:1)*(g[N*((N+Math.floor(i/N)+z%3-1)%N)+(N+i%N+Math.floor(z/3)-1)%N]<B?0:1);}ng[i]=S%7==3||S==11?B:Math.max(0,g[i]-Z);let s=ng[i]*(ng[i]===B?3:1);ctx.fillStyle=\"rgb(\"+s+\",\"+s+\",\"+s+\")\";ctx.fillRect(i%N*C,Math.floor(i/N)*C,C,C);}g=ng;}</ script></body></html>"],
+            ["Syntactic desugar",           "<html><body><canvas id=\"grid\" width=\"500\" height=\"500\" style=\"border-style:solid;\"/><script>C=10,N=50,B=83,Z=5,R=0.1;d=document.getElementById(\"grid\").getContext(\"2d\");f=n=>Math.floor(n);g=[];for(j=0;j<N*N;j++)g[j]=Math.random()<=R?B:0;setInterval(()=>{h=[];for(i=0;i<N*N;i++){S=0;for(z=0;z<9;z++)S+=(z==4?8:1)*(g[N*((N+f(i/N)+z%3-1)%N)+(N+i%N+f(z/3)-1)%N]<B?0:1);h[i]=S%7==3||S==11?B:Math.max(0,g[i]-Z);s=h[i]*(h[i]==B?3:1);d.fillStyle=`rgb(${s},${s},${s})`;d.fillRect(i%N*C,f(i/N)*C,C,C);}g=h;},100);</ script></body></html>"],
+            ["Low hanging fruit",           "<html><body><canvas id=\"g\" width=\"500\" height=\"500\"/><script>C=10,N=50,B=83,Z=5,M=N*N;d=document.getElementById(\"g\").getContext(\"2d\");f=n=>Math.floor(n);g=[];for(j=0;j<M;j++)g[j]=Math.random()<=0.1?B:0;setInterval(()=>{h=[];for(i=0;i<M;i++){S=0;for(z=0;z<9;z++)S+=(z==4?8:1)*(g[N*((N+f(i/N)+z%3-1)%N)+(N+i%N+f(z/3)-1)%N]<B?0:1);h[i]=S%7==3||S==11?B:Math.max(0,g[i]-Z);s=h[i]*(h[i]==B?3:1);d.fillStyle=`rgb(${s},${s},${s})`;d.fillRect(i%N*C,f(i/N)*C,C,C);}g=h;},100);</ script></body></html>"],
+            ["Fewer tags",                  "<canvas id=\"g\" width=500 height=500/><script>C=10,N=50,B=83,Z=5,M=N*N,m=Math;d=document.getElementById(\"g\").getContext(\"2d\");f=n=>m.floor(n);g=[];for(j=0;j<M;j++)g[j]=m.random()<=0.1?B:0;setInterval(()=>{h=[];for(i=0;i<M;i++){S=0;for(z=0;z<9;z++)S+=(z==4?8:1)*(g[N*((N+f(i/N)+z%3-1)%N)+(N+i%N+f(z/3)-1)%N]<B?0:1);h[i]=S%7==3||S==11?B:m.max(0,g[i]-Z);s=h[i]*(h[i]==B?3:1);d.fillStyle=`rgb(${s},${s},${s})`;d.fillRect(i%N*C,f(i/N)*C,C,C);}g=h;},100);</ script>"],
+            ["getElementById",              "<canvas id=g width=500 height=500/><script>for(C=10,N=50,B=83,M=N*N,m=Math,d=g.getContext(\"2d\"),f=i=>m.floor(i),g=[],j=0;j<M;j++)g[j]=m.random()<=.1?B:0;setInterval(_=>{for(h=[],i=0;i<M;i++){for(z=S=0;z<9;z++)S+=(z-4?1:8)*(g[N*((N+f(i/N)+z%3-1)%N)+(N+i+f(z/3)-1)%N]<B?0:1);s=h[i]=S%7!=3&&S-11?m.max(0,g[i]-5):B;s*=s-B?1:3;d.fillStyle=`rgb(${s},${s},${s})`;d.fillRect(i%N*C,f(i/N)*C,C,C);}g=h},100)</ script>"],
+            ["Going green",                 "<canvas id=g width=500 height=500/><script>for(C=9,N=50,B=85,M=N*N,m=Math,d=g.getContext`2d`,f=i=>m.floor(i),j=0;j<M;j++)g[j]=m.random()<=.1?B:0;setInterval(_=>{for(h=[],i=0;i<M;i++){for(z=S=0,y=f(i/N);z<9;z++)S+=(z-4?1:8)*(g[N*((N+y+z%3-1)%N)+(N+i+f(z/3)-1)%N]<B?0:1);s=h[i]=S%7!=3&&S-11?m.max(0,g[i]-5):B;d.fillStyle=`rgb(0,${s-B?s:3*s},0)`;d.fillRect(i%N*C,y*C,C,C)}g=h},99)</ script>"],
+            ["Smaller expansions",          "<canvas id=g width=500 height=500/><script>for(C=9,N=50,m=Math,d=g.getContext`2d`,f=i=>m.floor(i),j=0;j<N*N;j++)g[j]=m.random()<=.1?85:0;setInterval(_=>{for(h=[],i=0;i<N*N;i++){for(z=S=0,y=f(i/N);z<9;z++)S+=(z-4?1:8)*(g[N*((N+y+z%3-1)%N)+(N+i+f(z/3)-1)%N]>84);s=h[i]=S%7!=3&&S-11?m.max(0,g[i]-5):85;d.fillStyle=`rgb(0,${s-85?s:3*s},0)`;d.fillRect(i%N*C,y*C,C,C)};g=h},99)</ script>"],
+            ["Lambda:fancy string:short",   "<canvas id=g width=800 height=800/><script>for(C=9,N=80,m=Math,d=g.getContext`2d`,f=i=>m.floor(i),j=0;j<N*N;j++)g[j]=m.random()<=.1?85:0;setInterval('for(h=[],i=0;i<N*N;i++){for(z=S=0,y=f(i/N);z<9;z++)S+=(z-4?1:8)*(g[N*((N+y+z%3-1)%N)+(N+i+f(z/3)-1)%N]>84);s=h[i]=S%7!=3&&S-11?m.max(0,g[i]-5):85;d.fillStyle=`rgb(0,${s-85?s:3*s},0)`;d.fillRect(i%N*C,y*C,C,C)}g=h',99)</ script>"],
+            ["Variable for a digit? Nop",   "<canvas id=g width=800 height=800/><script>for(N=80,m=Math,d=g.getContext`2d`,j=0;j<N*N;j++)g[j]=m.random()<.1?85:0;setInterval('for(h=[],i=0;i<N*N;i++){for(z=S=0,y=m.floor(i/N);z<9;z++)S+=g[N*((N+y+z%3-1)%N)+(i+m.floor(z/3)-1)%N]>79;s=h[i]=S-3&&(S-4||g[i]-N)?g[i]-5:N;d.fillStyle=`rgb(0,${s-N?s:3*s},0)`;d.fillRect(i%N*9,y*9,9,9)}g=h',99)</ script>"],
+            ["Reuse N again",               "<canvas id=g width=800 height=800/><script>for(N=80,m=Math,d=g.getContext`2d`,j=0;j<N*N;j++)g[j]=m.random()<.1?N:0;setInterval('for(h=[],i=0;i<N*N;i++){for(z=S=0,y=m.floor(i/N);z<9;z++)S+=g[N*((N+y+z%3-1)%N)+(i+m.floor(z/3)-1)%N]>79;s=h[i]=S-3&&(S-4||g[i]-N)?g[i]-5:N;d.fillStyle=`rgb(0,${s-N?s:3*s},0)`;d.fillRect(i%N*9,y*9,9,9)}g=h',99)</ script>"],
+            ["f=Math.floor",                "<canvas id=g width=800 height=800/><script>for(N=80,f=Math.floor,d=g.getContext`2d`,j=0;j<N*N;j++)g[j]=Math.random()<.1?N:0;setInterval('for(h=[],i=0;i<N*N;i++){for(z=S=0,y=f(i/N);z<9;z++)S+=g[N*((N+y+z%3-1)%N)+(i+f(z/3)-1)%N]>79;s=h[i]=S-3&&(S-4||g[i]-N)?g[i]-5:N;d.fillStyle=`rgb(0,${s-N?s:3*s},0)`;d.fillRect(i%N*9,y*9,9,9)}g=h',99)</ script>"],
+            ["floor -> parseInt",           "<canvas id=g width=800 height=800/><script>for(N=80,f=parseInt,d=g.getContext`2d`,j=0;j<N*N;j++)g[j]=Math.random()<.1?N:0;setInterval('for(h=[],i=0;i<N*N;i++){for(z=S=0,y=f(i/N);z<9;z++)S+=g[N*((N+y+z%3-1)%N)+(i+f(z/3)-1)%N]>79;s=h[i]=S-3&&(S-4||g[i]-N)?g[i]-5:N;d.fillStyle=`rgb(0,${s-N?s:3*s},0)`;d.fillRect(i%N*9,y*9,9,9)}g=h',99)</ script>"],
+            ["j==N*N anyway",               "<canvas id=g width=800 height=800/><script>for(N=80,f=parseInt,d=g.getContext`2d`,j=0;j<N*N;j++)g[j]=Math.random()<.1?N:0;setInterval('for(h=[],i=0;i<j;i++){for(z=S=0,y=f(i/N);z<9;z++)S+=g[N*((N+y+z%3-1)%N)+(i+f(z/3)-1)%N]>79;s=h[i]=S-3&&(S-4||g[i]-N)?g[i]-5:N;d.fillStyle=`rgb(0,${s-N?s:3*s},0)`;d.fillRect(i%N*9,y*9,9,9)}g=h',99)</ script>"],
+            ["The answer is 87",            "<canvas id=g width=800 height=800/><script>for(N=80,f=parseInt,d=g.getContext`2d`,j=0;j<N*N;j++)g[j]=Math.random()*87;setInterval('for(h=[],i=0;i<j;i++){for(z=S=0,y=f(i/N);z<9;z++)S+=g[N*((N+y+z%3-1)%N)+(i+f(z/3)-1)%N]>79;s=h[i]=S-3&&(S-4||g[i]-N)?g[i]-5:N;d.fillStyle=`rgb(0,${s-N?s:3*s},0)`;d.fillRect(i%N*9,y*9,9,9)}g=h',99)</ script>"],
+            ["Tilt?",                       "<canvas id=g width=800 height=800/><script>for(N=80,f=parseInt,d=g.getContext`2d`,j=0;j<N*N;j++)g[j]=Math.random()*87;setInterval('for(h=[],i=0;i<j;i++){for(z=S=0;z<9;z++)S+=g[N*((N+f(i/N)+z%3-1)%N)+(i+f(z/3)-1)%N]>79;s=h[i]=S-3&&(S-4||g[i]-N)?g[i]-5:N;d.fillStyle=`rgb(0,${s-N?s:3*s},0)`;d.fillRect(i%N*9,i/N*9,9,9)}g=h',99)</ script>"],
+            ["Inline increment",            "<canvas id=g width=800 height=800/><script>for(N=80,f=parseInt,d=g.getContext`2d`,j=0;j<N*N;j++)g[j]=Math.random()*87;setInterval('for(h=[],i=0;i<j;i++){for(z=S=0;z<9;S+=g[f(i/N+z%3-1)%N*N+f(i+z++/3-1)%N]>79);s=h[i]=S-3&&(S-4||g[i]-N)?g[i]-5:N;d.fillStyle=`rgb(0,${s-N?s:3*s},0)`;d.fillRect(i%N*9,f(i/N)*9,9,9)}g=h',99)</ script>"],
+            ["More increment",              "<canvas id=g width=800 height=800/><script>for(N=80,d=g.getContext`2d`,j=0;j<N*N;g[j++]=Math.random()*87)f=parseInt;setInterval('for(h=[],i=0;i<j;i++){for(z=S=0;z<9;S+=g[f(i/N+z%3-1)%N*N+f(z++/3+i-1)%N]>79);s=h[i]=S-3&&(S-4||g[i]-N)?g[i]-5:N;d.fillStyle=`rgb(0,${s-N?s:3*s},0)`;d.fillRect(i%N*9,f(i/N)*9,9,9)}g=h',N)</ script>"],
+            ["Max brightness",              "<canvas id=g width=800 height=800/><script>for(N=80,d=g.getContext`2d`,j=0;j<N*N;g[j++]=Math.random()*87)f=parseInt;setInterval('for(h=[],i=0;i<j;i++){for(z=S=0;z<9;S+=g[f(i/N+z%3-1)%N*N+f(z++/3+i-1)%N]>79);s=h[i]=S-3&&(S-4||g[i]-N)?g[i]-5:N;d.fillStyle=`rgb(0,${s-N?s:j},0)`;d.fillRect(i%N*9,f(i/N)*9,9,9)}g=h',N)</ script>"],
+            ["Halo's gone",                 "<canvas id=g width=800 height=800/><script>for(N=80,d=g.getContext`2d`,j=0;j<N*N;g[j++]=Math.random()<.1)f=parseInt;setInterval('for(h=[],i=0;i<j;i++){for(z=S=0;z<9;S+=g[f(i/N+z%3-1)%N*N+f(z++/3+i-1)%N]);h[i]=S==3||S==4&&g[i];d.fillStyle=h[i]?\"red\":\"black\";d.fillRect(i%N*9,f(i/N)*9,9,9)}g=h',N)</ script>"],
+            ["'Tan' is short",              "<canvas id=g width=800 height=800/><script>for(N=80,d=g.getContext`2d`,j=0;j<N*N;g[j++]=Math.random()<.1)f=parseInt;setInterval('for(h=[],i=0;i<j;i++){for(z=S=0;z<9;S+=g[f(i/N+z%3+j-1)%N*N+f(i+z++/3+j-1)%N]);d.fillStyle=(h[i]=S==3|S==4&g[i])?\"red\":\"tan\";d.fillRect(i%N*9,f(i/N)*9,9,9)}g=h',N)</ script>"],
+            ["Complex increment",           "<canvas id=g width=800 height=800/><script>for(N=80,d=g.getContext`2d`,j=0;j<N*N;g[j++]=Math.random()<.1)f=parseInt;setInterval('for(h=[],i=0;i<j;d.fillStyle=(h[i]=[1,g[i]][S-3]|0)?\"red\":\"tan\",d.fillRect(i%N*9,f(i++/N)*9,9,9))for(z=S=0;z<9;S+=g[f(i/N+z%3+j-1)%N*N+f(i+z++/3+j-1)%N]);g=h',N)</ script>"],
+            ["Generated size",              "<canvas id=g><script>N=80;g.width=g.height*=5;d=g.getContext`2d`;for(j=0;j<N*N;g[j++]=Math.random()<.1)f=parseInt;setInterval('for(h=[],i=0;i<j;d.fillStyle=(h[i]=S==3|S==4&g[i])?\"red\":\"tan\",d.fillRect(i%N*9,f(i++/N)*9,9,9))for(z=S=0;z<9;S+=g[f(i/N+z%3+j-1)%N*N+f(i+z++/3+j-1)%N]);g=h',N)</ script>"],
+            ["<<S>> shifting",              "<canvas id=g><script>g.height=g.width*=3;for(j=0,N=80;j<N*N;g[j++]=Math.random()<.1)d=g.getContext`2d`;setInterval('for(h=[],i=0;i<j;d.fillStyle=(h[i]=2+g[i]<<S>>4&1)?\"red\":\"tan\",d.fillRect(i%N*9,f(i++/N)*9,9,9))for(z=S=0;z<9;S+=g[f(i/N+z%3+N-1)%N*N+f(i+z++/3+N-1)%N])f=parseInt;g=h',N)</ script>"],
+            ["Date init",                   "<canvas id=g><script>g.height=g.width*=3;for(j=0,N=80;j<N*N;g[j++]=Date.now()%2)d=g.getContext`2d`;setInterval('for(h=[],i=0;i<j;d.fillStyle=(h[i]=2+g[i]<<S>>4&1)?\"red\":\"tan\",d.fillRect(i%N*9,f(i++/N)*9,9,9))for(z=S=0;z<9;S+=g[f(i/N+z%3+N-1)%N*N+f(i+z++/3+N-1)%N])f=parseInt;g=h',N)</ script>"],
+            ["Loop fusion",                 "<canvas id=G><script>G.height=G.width*=3;N=80,d=G.getContext`2d`;g=0;setInterval('for(h=[],i=0;i<N*N;d.fillStyle=(h[i]=g?2+g[i]<<S>>4&1:Date.now()%2)?\"red\":\"tan\",d.fillRect(i%N*9,f(i++/N)*9,9,9))for(z=S=0;z<9;S+=g[f(i/N+z%3+N-1)%N*N+f(i+z++/3+N-1)%N])f=parseInt;g=h',N)</ script>"],
+            ["Eval ftw",                    "<canvas id=G><script>G.height=G.width*=3;N=80;g=0;setInterval('for(h=[],i=0;i<N*N;eval(`G.getContext(\"2d\").${(h[i]=g?2+g[i]<<S>>4&1:Date.now()%2)?\"fill\":\"clear\"}Rect(i%N*9,f(i++/N)*9,9,9)`))for(z=S=0;z<9;S+=g[f(i/N+z%3+N-1)%N*N+f(i+z++/3+N-1)%N])f=parseInt;g=h',N)</ script>"],
+            ["Smaller board",               "<canvas id=G><script>G.height*=2;N=75;g=0;setInterval('for(h=[],i=0;i<N*N;eval(`G.getContext(\"2d\").${(h[i]=(g?2+g[i]<<S>>4:Date.now())&1)?\"fill\":\"clear\"}Rect(i%N*4,f(i++/N)*4,4,4)`))for(z=S=0;z<9;S+=g[f(i/N+z%3+N-1)%N*N+f(i+z++/3+N-1)%N])f=parseInt;g=h',N)</ script>"],
+            ["heights's out",               "<canvas id=G height=300><script>N=75;g=0;setInterval('for(h=[],i=0;i<N*N;eval(`G.getContext(\"2d\").${(h[i]=(g?2+g[i]<<S>>4:Date.now())&1)?\"fill\":\"clear\"}Rect(i%N*4,f(i++/N)*4,4,4)`))for(z=S=0;z<9;S+=g[f(i/N+z%3+N-1)%N*N+f(i+z++/3+N-1)%N])f=parseInt;g=h',N)</ script>"],
+            ["Cells",                       "<canvas id=G height=300><script>N=75;g=0;setInterval('for(h=[i=0];i<N*N;eval(`G.getContext(\"2d\").${(h[i]=(g?2+g[i]<<S>>4:Date.now())&1)?\"fill\":\"clear\"}Rect(i%N*4,f(i++/N)*4,3,3)`))for(z=S=0;z<9;S+=g[f(i/N+z%3+N-1)%N*N+f(i+z++/3+N-1)%N])f=parseInt;g=h',N)</ script>"],
+            ["N is the interval",           "<canvas id=G height=300><script>g=0;setInterval('for(h=[i=0];i<N*N;eval(`G.getContext(\"2d\").${(h[i]=(g?2+g[i]<<S>>4:Date.now())&1)?\"fill\":\"clear\"}Rect(i%N*4,f(i++/N)*4,3,3)`))for(z=S=0;z<9;S+=g[f(i/N+z%3+N-1)%N*N+f(i+z++/3+N-1)%N])f=parseInt;g=h',N=75)</ script>"],
+            ["svg onload",                  "<canvas id=G height=300><svg onload=setInterval('for(N=75,h=[i=0];i<N*N;eval(`G.getContext(\"2d\").${(h[i]=(g?S==3|S==4&g[i]:Date.now())&1)?\"fill\":\"clear\"}Rect(i%N*4,f(i++/N)*4,3,3)`))for(z=S=0;z<9;S+=g[f(i/N+z%3+N-1)%N*N+f(i+z++/3+N-1)%N])f=parseInt;g=h',g=0)>"],
+            ["Precedence rules",            "<canvas id=G height=300><svg onload=setInterval('for(N=75,h=[i=0];i<N*N;eval(`G.getContext(\"2d\").${(h[i]=g?S==3|S==4&g[i]:Date.now()&1)?\"fill\":\"clear\"}Rect(i%N*4,f(i++/N)*4,3,3)`))for(z=S=0;z<9;S+=g[f(i/N+z%3+N-1)%N*N+f(i+z++/3+N-1)%N])f=parseInt;g=h',g=0)>"],
+            ["Invert z loop",               "<canvas id=G height=300><svg onload=setInterval('for(N=75,h=[i=0];i<N*N;eval(`G.getContext(\"2d\").${(h[i]=g?S==6|S==5&g[i]:Date.now()&1)?\"fill\":\"clear\"}Rect(i%N*4,f(i++/N)*4,3,3)`))for(z=S=9;z;S-=g[f(i/N+--z%3+N-1)%N*N+f(i+z/3+N-1)%N])f=parseInt;g=h',g=0)>"],
+            ["Decrement i",                 "<canvas id=G height=300><svg onload=setInterval('for(h=[i=(N=75)*N];i--;eval(`G.getContext(\"2d\").${(h[i]=g?S==5?g[i]:S==6:Date.now()&1)?\"fill\":\"clear\"}Rect(i%N*4,f(i/N)*4,3,3)`))for(z=S=9;z;S-=g[f(i/N+--z%3+N-1)%N*N+f(i+z/3+N-1)%N])f=parseInt;g=h',g=0)>"],
+            ["Reverse ternary",             "<canvas id=G height=300><svg onload=setInterval('for(h=[i=(N=75)*N];i--;eval(`G.getContext(\"2d\").${(h[i]=g?S-5?S==6:g[i]:Date.now()&1)?\"fill\":\"clear\"}Rect(i%N*4,f(i/N)*4,3,3)`))for(z=S=9;z;S-=g[f(i/N+--z%3+N-1)%N*N+f(i+z/3+N-1)%N])f=parseInt;g=h',g=0)>"],
+            ["Zero width cell",             "<canvas id=G><svg onload=setInterval('for(G.height=300,h=[i=(N=75)*N];i--;G.getContext(\"2d\").fillRect(i%N*4,f(i/N)*4,3*((h[i]=g?S-5?S==6:g[i]:Date.now()&1)),3))for(z=S=9;z--;S-=g[f(i/N+z%3+N-1)%N*N+f(i+z/3+N-1)%N])f=parseInt;g=h',g=0)>"],
+            ["Low hanging fruit",           "<canvas id=G><svg onload=setInterval('for(G.height=300,h=[i=(N=75)*N];i--;G.getContext(\"2d\").fillRect(i%N*4,f(i/N)*4,3*(h[i]=g?S-5?S==6:g[i]:Date.now()&1),3))for(z=S=9;z--;S-=g[f(i/N+z%3+N-1)%N*N+f(i+z/3+N-1)%N])f=parseInt;g=h',g=0)>"],
+            ["Huge canvas",                 "<canvas id=G><svg onload=setInterval('for(h=[G.height=i=(N=75)*N];i--;G.getContext(\"2d\").fillRect(i%N*4,f(i/N)*4,3*(h[i]=g?S-5?S==6:g[i]:Date.now()&1),3))for(z=S=9;z--;S-=g[f(i/N+z%3+N-1)%N*N+f(i+z/3+N-1)%N])f=parseInt;g=h',g=0)>"],
+            ["Return of `2d`",              "<canvas id=G><svg onload=setInterval('for(h=[G.height=i=(N=75)*N];i--;G.getContext`2d`.fillRect(i%N*4,f(i/N)*4,3*(h[i]=g?S-5?S==6:g[i]:Date.now()&1),3))for(z=S=9;z--;S-=g[f(i/N+z%3+N-1)%N*N+f(i+z/3+N-1)%N])f=parseInt;g=h',g=0)>"],
+            ["N==75",                       "<canvas id=G><svg onload=setInterval('for(h=[G.height=i=(N=75)*N];i--;G.getContext`2d`.fillRect(i%N*4,f(i/N)*4,3*(h[i]=g?S-5?S==6:g[i]:Date.now()&1),3))for(z=S=9;z--;S-=g[f(i/N+z%3+74)%N*N+f(i+z/3+74)%N])f=parseInt;g=h',g=0)>"],
+            ["text?!",                      "<canvas id=G><svg onload=setInterval('for(h=[G.height=i=(N=75)*N];i--;(h[i]=g?S-5?S==6:g[i]:Date.now()&1)&&G.getContext`2d`.fillText(0,i%N*4,f(i/N)*4))for(z=S=9;z--;S-=g[f(i/N+z%3+74)%N*N+f(i+z/3+74)%N])f=parseInt;g=h',g=0)>"],
+            ["parseInt is ~~",              "<canvas id=G><svg onload=setInterval('for(h=[G.height=i=(N=75)*N];i--;(h[i]=g?S-5?S==6:g[i]:Date.now()&1)&&G.getContext`2d`.fillText(0,i%N*4,~~(i/N)*4))for(z=S=9;z--;S-=g[~~(i/N+z%3+74)%N*N+~~(i+z/3+74)%N]);g=h',g=0)>"],
+            ["2-complement",                "<canvas id=G><svg onload=setInterval('for(h=[G.height=i=(N=75)*N];i--;(h[i]=g?S-5?S==6:g[i]:Date.now()&1)&&G.getContext`2d`.fillText(0,i%N*4,~~(i/N)*4))for(z=S=9;z--;S-=g[~~(i/N+z%3+74)%N*N-~(i+z/3+73)%N]);g=h',g=0)>"],
+            ["j=i/N",                       "<canvas id=G><svg onload=setInterval('for(h=[G.height=i=(N=75)*N];i--;(h[i]=g?S-5?S==6:g[i]:Date.now()&1)&&G.getContext`2d`.fillText(0,i%N*4,j*4))for(z=S=9;z--;S-=g[(j+z%3+74)%N*N-~(i+z/3+73)%N])j=~~(i/N);g=h',g=0)>"],
+            ["down",                        "<canvas id=G><svg onload=setInterval('for(h=[G.height=i=(N=75)*N];i--;(h[i]=g?S-5?S==6:g[i]:Date.now()&1)&&G.getContext`2d`.fillText(0,i%N*4,j*4))for(z=S=9;z--;S-=g[(j+z%3)%N*N-~(i+z/3+73)%N])j=73-~(i/N);g=h',g=0)>"],
+            ["z ends in 0",                 "<canvas id=G><svg onload=setInterval('for(h=[G.height=i=(N=75)*N];i--;(h[i]=g?S-5?S==6:g[i]:Date.now()&1)&&G.getContext`2d`.fillText(0,i%N*4,j*4))for(z=S=9;z--;S-=g[j%N*N-~(i+z/3+73)%N])j=73-~(i/N+z%3);g=h',g=0)>"],
+            ["arithmetic",                  "<canvas id=G><svg onload=setInterval('for(h=[G.height=i=(N=75)*N];i--;(h[i]=g?S-5?S==6:g[i]:Date.now()&1)&&G.getContext`2d`.fillText(0,i%N*4,~j*4))for(z=S=9;z--;S-=g[~j%N*N-~(i+z/3+73)%N])j=-N-i/N-z%3;g=h',g=0)>"],
+            ["singlePixel",                 "<canvas id=G><svg onload=setInterval('for(h=[i=(G.width=N=75)*N];i--;G.getContext`2d`.fillRect(i%N,~j,1,h[i]=g?S-5?S==6:g[i]:Date.now()&1))for(z=S=9;z--;S-=g[~j%N*N+~(-i-z/3-N)%N])j=-i/N-z%3-N;g=h',g=0)>"],
+            ["Final?",                      "<canvas id=G><svg onload=setInterval('for(h=[i=(G.width=N=75)*N];i--;G.getContext`2d`.fillRect(i%N,~j,1,h[i]=g?S-5?S==6:g[i]:Date.now()&1))for(z=S=9;z--;S-=g[~j%N*N+~(-i-z/3-N)%N])j=-i/N-z%3-N;g=h',g=0)>"],
+        ]
+
+        // Returns a list of tuples (str,pos,changed) where str is the revised string at position pos, and changed tells
+        // if anything material changed from the last point (besides moving forward with no modifications).
+        function* changes(s, t) {
+            // D[i,j] = min distance between s[0..i) and t[0..j)
+            let sl = s.length, tl = t.length;
+            let D = []; // [sl + 1, tl + 1];
+            for (let Di = 0; Di < sl + 1; Di++) {
+                D[Di] = [];
+                for (let DDi = 0; DDi < tl + 1; DDi++) {
+                    D[Di][DDi] = null;            
+                }
+            }
+
+            for (let i = 1; i <= sl; ++i) D[i][0] = i;
+            for (let j = 1; j <= tl; ++j) D[0][j] = j;
+            for (let j = 1; j <= tl; ++j) {
+                for (let i = 1; i <= sl; ++i) {
+                    D[i][j] = Math.min(D[i - 1][j - 1] + (s[i - 1] == t[j - 1] ? 0 : 1), Math.min(D[i - 1][j] + 1, D[i][j - 1] + 1));
+                }
+            }
+
+            let u = t;
+            yield [u + '', u.length - 1, false];
+
+            for (let k = 0; k < Math.max(s.length, t.length); ++k) {
+                let changed = true;
+                let suffix = 0;
+                let t2 = "";
+                if (D[sl][tl] > D[sl - 1][tl]) {
+                    sl--;
+                    t2 = s[sl].toString();
+                } else if (D[sl][tl] > D[sl][tl - 1]) {
+                    tl--;
+                    suffix++;
+                } else if (D[sl][tl] > D[sl - 1][tl - 1]) {
+                    tl--;
+                    sl--;
+                    t2 = s[sl].toString();
+                    suffix++;
+                } else {
+                    tl--;
+                    sl--;
+                    t2 = t[tl].toString(); 
+                    suffix++;
+                    changed = false;
+                }
+
+                let t1 = u.substring(0, tl);
+                let t3 = u.substring(tl + suffix);
+                u = t1 + t2 + t3;
+                yield [u, Math.min(tl, u.length - 1), changed];
+            }
+        }
+
+        let escapeElement = document.createElement("div");
+        function escapeHack(s) {
+            escapeElement.innerText = s;
+            return escapeElement.innerHTML;
+        }
+
+        let v = 0;
+        let changed = false;
+        let paused = false;
+
+        function change(delta) {
+            v = Math.min(log.length - 2, Math.max(0, v + delta));
+            changed = true;
+        }
+
+        function pause() {
+            paused = !paused;
+        }
+        
+        async function run() {
+            // Fix odd escaping issue with closing script tags
+            for (let i in log) {
+                log[i][1] = log[i][1].replace("/ script", "/script");
+            }
+
+            code.innerHTML = `<span style='color:rgb(211, 211, 211)'>${escapeHack(log[0][1])}</span>`;
+            iteration.innerText = 0;
+            codelen.innerText = log[0][1].length;
+            await sleep(2000);
+            
+            while (true) {
+                changed = false;
+                if (v < log.length - 1) {
+                    isLast = v == log.length - 2;
+                    isFirst = v == 0;
+                    if (v > 0) {
+                        // Minor fixes for presentation purposes
+                        src = log[v][1]
+                            .replace("g=0)>", "(g=0)+75)>") // normalize speed
+                            .replace("<canvas id", "<body style='overflow:hidden'><canvas style='padding:0;display:block;margin-left:auto;margin-right:auto' id"); // center canvas
+                        if (src.includes("j=73-~(i/N") || src.includes("j=-N-i/N")) {
+                            src = src.replace("<body style='", "<body style='transform:translateY(-300px);");
+                        }
+                        else if (src.includes("i=(G.width=N=75)*N")) {
+                            src = src.replace("<body style='", "<body style='transform:scale(4);");
+                        }
+
+                        src += `<script>
+                            let c = document.getElementsByTagName("canvas")[0];
+                            let bw = document.body.offsetWidth, cw = c.width, r = bw / cw;
+                            if (r < 1) {
+                                let x = Math.floor((bw - cw) / 2);
+                                let y = 2 * x - (c.height == 800 ? 50 : -50);
+                                document.body.style.transform = "scale(" + r + ")";
+                                document.body.style.transform += "translate(" + x + "px," + y + "px)";
+                            }
+                            </ script>`.replace("/ script", "/script");
+
+                        demo.srcdoc = src;
+                    }
+
+                    comment.innerText = log[v+1][0];
+                    
+                    for (let x of [...changes(log[v][1], log[v + 1][1])].reverse()) {
+                        iteration.innerText = isLast ? "Last" : v + 1;
+                        codelen.innerText = x[0].length;
+                        
+                        code.innerHTML = `<span style='color:rgb(0,211,211)'>${
+                            escapeHack(x[0].substring(0, x[1]))
+                            }</span><span style='color:lightgray'><span style='background-color:${
+                            (x[2] || isLast) ? "red" : "rgb(0,211,211)"}'>${
+                            escapeHack(x[0][x[1]])
+                            }</span>${escapeHack(x[0].substring(x[1]+1))}</span>`;
+
+                        await sleep(x[2] && !isFirst && !isLast ? 70 : 4);
+                        
+                        if (changed) {
+                            break;
+                        }
+
+                        while (paused) {
+                            await sleep(100);
+                        }
+                    }
+
+                    if (changed) {
+                        continue;
+                    }
+
+                    while (paused) {
+                        await sleep(100);
+                    }
+
+                    for (let c = 0; c < 212; c += 2) {
+                        code.innerHTML = `<span style='color:rgb(${c}, 211, 211)'>${escapeHack(log[v + 1][1])}</span>&nbsp;`;
+                        await sleep(0);
+                    }
+
+                    v++;
+                }
+
+                await sleep(500);
+            }
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }        
+
+        function toggleRules() {
+            rules.style.display = rules.style.display === "none" ? "block" : "none";
+        }
+
+        run();        
+    </script>
+</body>
+</html>
