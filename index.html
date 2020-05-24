@@ -51,16 +51,16 @@
             Iteration: <span id="iteration" style="min-width: 45px; text-align: right; display: inline-block"></span>, 
             Length: <span id="codelen" style="min-width: 45px; text-align: right; display: inline-block"></span>
             <br />
+            <a style="text-decoration: none;" href="javascript:(void 0)" data-set-delay="280">1x</a>&nbsp;
+            <a style="text-decoration: none;" href="javascript:(void 0)" data-set-delay="140">2x</a>&nbsp;
+            <a style="text-decoration: none;" href="javascript:(void 0)" data-set-delay="70">4x</a>&nbsp;
+            <a style="text-decoration: none;" href="javascript:(void 0)" data-set-delay="35">8x</a>
+            <br />
             <a style="text-decoration: none;" href="javascript:change(-1000)">|&lt;</a>&nbsp;
             <a style="text-decoration: none;" href="javascript:change(-1)">&lt;</a>&nbsp;
             <a style="text-decoration: none;" href="javascript:pause()">||</a>&nbsp;
             <a style="text-decoration: none;" href="javascript:change(1)">&gt;</a>&nbsp;
             <a style="text-decoration: none;" href="javascript:change(1000)">&gt;|</a>
-            <br />
-            <a style="text-decoration: none;" href="javascript:setDelay(400)">1x</a>&nbsp;
-            <a style="text-decoration: none;" href="javascript:setDelay(200)">2x</a>&nbsp;
-            <a style="text-decoration: none;" href="javascript:setDelay(100)">4x</a>&nbsp;
-            <a style="text-decoration: none;" href="javascript:setDelay(0)">99x</a>
         </h3>
     </div>
 
@@ -126,7 +126,7 @@
             ["Final?",                      "<canvas id=G><svg onload=setInterval('for(h=[i=(G.width=N=75)*N];i--;G.getContext`2d`.fillRect(i%N,~j,1,h[i]=g?S-5?S==6:g[i]:Date.now()&1))for(z=S=9;z--;S-=g[~j%N*N+~(-i-z/3-N)%N])j=-i/N-z%3-N;g=h',g=0)>"],
         ]
 
-        var delay = 0;
+        let delay = 70;
 
         // Returns a list of tuples (str,pos,changed) where str is the revised string at position pos, and changed tells
         // if anything material changed from the last point (besides moving forward with no modifications).
@@ -201,9 +201,18 @@
             paused = !paused;
         }
 
-        function setDelay(newDelay) {
+        const speedButtons = Array.from(document.querySelectorAll('[data-set-delay]'));
+        function clickSpeedButton(elem) {
+            const newDelay = Number(elem.getAttribute('data-set-delay'));
             delay = newDelay;
+            speedButtons.forEach(otherElem => otherElem.style.color = otherElem === elem ? 'black' : '');
         }
+        speedButtons.forEach(elem => {
+            elem.style.cursor = 'pointer';
+            elem.addEventListener('click', () => clickSpeedButton(elem));
+        });
+        // Activate the default speed button
+        clickSpeedButton(document.querySelectorAll('[data-set-delay]')[2]);
 
         async function run() {
             // Fix odd escaping issue with closing script tags
