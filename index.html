@@ -46,10 +46,15 @@
     </div>
 
     <div style="text-align: center;">
-        <h2 style="padding-bottom: 0; margin-bottom: 0;font-size: 1.4em; font-family: 'Consolas', Courier, monospace;">Conway's Game of Life <sup><a href="javascript:toggleRules()">[?]</a></sup></h2>
-        <h3 style="padding-top: 5px; margin-top: 0; font-family: 'Consolas', Courier, monospace;">
+        <h2 style="padding-bottom: 0; margin-bottom: 0;font-size: 1.4em; font-family: 'Consolas', monospace, Courier;">Conway's Game of Life <sup><a href="javascript:toggleRules()">[?]</a></sup></h2>
+        <h3 style="padding-top: 5px; margin-top: 0; font-family: 'Consolas', monospace, Courier;">
             Iteration: <span id="iteration" style="min-width: 45px; text-align: right; display: inline-block"></span>, 
             Length: <span id="codelen" style="min-width: 45px; text-align: right; display: inline-block"></span>
+            <br />
+            <a style="text-decoration: none;" href="javascript:(void 0)" data-set-delay="280">1x</a>&nbsp;
+            <a style="text-decoration: none;" href="javascript:(void 0)" data-set-delay="140">2x</a>&nbsp;
+            <a style="text-decoration: none;" href="javascript:(void 0)" data-set-delay="70">4x</a>&nbsp;
+            <a style="text-decoration: none;" href="javascript:(void 0)" data-set-delay="35">8x</a>
             <br />
             <a style="text-decoration: none;" href="javascript:change(-1000)">|&lt;</a>&nbsp;
             <a style="text-decoration: none;" href="javascript:change(-1)">&lt;</a>&nbsp;
@@ -61,7 +66,7 @@
 
     <div id="comment"></div>
 
-    <div id="code" style="border-style: solid; padding: 8px; margin-bottom: 10px; font-family: 'Consolas', Courier, monospace;white-space: pre-wrap;word-break: break-all;background-color: black; color: lightgray;">
+    <div id="code" style="border-style: solid; padding: 8px; margin-bottom: 10px; font-family: 'Consolas', monospace, Courier; white-space: pre-wrap; word-break: break-all; line-height: 1.25; background-color: black; color: lightgray;">
         code
     </div>
 
@@ -120,6 +125,8 @@
             ["singlePixel",                 "<canvas id=G><svg onload=setInterval('for(h=[i=(G.width=N=75)*N];i--;G.getContext`2d`.fillRect(i%N,~j,1,h[i]=g?S-5?S==6:g[i]:Date.now()&1))for(z=S=9;z--;S-=g[~j%N*N+~(-i-z/3-N)%N])j=-i/N-z%3-N;g=h',g=0)>"],
             ["Final?",                      "<canvas id=G><svg onload=setInterval('for(h=[i=(G.width=N=75)*N];i--;G.getContext`2d`.fillRect(i%N,~j,1,h[i]=g?S-5?S==6:g[i]:Date.now()&1))for(z=S=9;z--;S-=g[~j%N*N+~(-i-z/3-N)%N])j=-i/N-z%3-N;g=h',g=0)>"],
         ]
+
+        let delay = 70;
 
         // Returns a list of tuples (str,pos,changed) where str is the revised string at position pos, and changed tells
         // if anything material changed from the last point (besides moving forward with no modifications).
@@ -193,7 +200,20 @@
         function pause() {
             paused = !paused;
         }
-        
+
+        const speedButtons = Array.from(document.querySelectorAll('[data-set-delay]'));
+        function clickSpeedButton(elem) {
+            const newDelay = Number(elem.getAttribute('data-set-delay'));
+            delay = newDelay;
+            speedButtons.forEach(otherElem => otherElem.style.color = otherElem === elem ? 'black' : '');
+        }
+        speedButtons.forEach(elem => {
+            elem.style.cursor = 'pointer';
+            elem.addEventListener('click', () => clickSpeedButton(elem));
+        });
+        // Activate the default speed button
+        clickSpeedButton(document.querySelectorAll('[data-set-delay]')[2]);
+
         async function run() {
             // Fix odd escaping issue with closing script tags
             for (let i in log) {
@@ -249,7 +269,7 @@
                             escapeHack(x[0][x[1]])
                             }</span>${escapeHack(x[0].substring(x[1]+1))}</span>`;
 
-                        await sleep(x[2] && !isFirst && !isLast ? 70 : 4);
+                        await sleep(x[2] && !isFirst && !isLast ? delay : delay / 20);
                         
                         if (changed) {
                             break;
