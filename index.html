@@ -128,9 +128,8 @@
 
         let delay = 70;
 
-        // Returns a list of tuples (str,pos,changed) where str is the revised string at position pos, and changed tells
-        // if anything material changed from the last point (besides moving forward with no modifications).
-        function* changes(s, t) {
+        function changes3(s, t)
+        {
             // D[i,j] = min distance between s[0..i) and t[0..j)
             let sl = s.length, tl = t.length;
             let D = []; // [sl + 1, tl + 1];
@@ -145,41 +144,35 @@
             for (let j = 1; j <= tl; ++j) D[0][j] = j;
             for (let j = 1; j <= tl; ++j) {
                 for (let i = 1; i <= sl; ++i) {
-                    D[i][j] = Math.min(D[i - 1][j - 1] + (s[i - 1] == t[j - 1] ? 0 : 1), Math.min(D[i - 1][j] + 1, D[i][j - 1] + 1));
+                    D[i][j] = Math.min(D[i - 1][j - 1] + (s[i - 1] === t[j - 1] ? 0 : 1), Math.min(D[i - 1][j] + 1, D[i][j - 1] + 1));
                 }
             }
 
-            let u = t;
-            yield [u + '', u.length - 1, false];
+            result = []
 
-            for (let k = 0; k < Math.max(s.length, t.length); ++k) {
-                let changed = true;
-                let suffix = 0;
-                let t2 = "";
-                if (D[sl][tl] > D[sl - 1][tl]) {
-                    sl--;
-                    t2 = s[sl].toString();
-                } else if (D[sl][tl] > D[sl][tl - 1]) {
-                    tl--;
-                    suffix++;
-                } else if (D[sl][tl] > D[sl - 1][tl - 1]) {
-                    tl--;
-                    sl--;
-                    t2 = s[sl].toString();
-                    suffix++;
-                } else {
-                    tl--;
-                    sl--;
-                    t2 = t[tl].toString(); 
-                    suffix++;
-                    changed = false;
+            for (k = 0; sl * tl > 0; ++k)
+            {
+                if (sl > 0 && D[sl][tl] > D[sl - 1][tl])
+                {
+                    result.push([s[--sl], 1]);
                 }
-
-                let t1 = u.substring(0, tl);
-                let t3 = u.substring(tl + suffix);
-                u = t1 + t2 + t3;
-                yield [u, Math.min(tl, u.length - 1), changed];
+                else if (D[sl][tl] > D[sl][tl - 1])
+                {
+                    result.push([t[--tl], 2]);
+                }
+                else if (D[sl][tl] > D[sl - 1][tl - 1])
+                {
+                    result.push([s[--sl], 4]);
+                    result.push([t[--tl], 5]);
+                }
+                else
+                {
+                    sl--;
+                    result.push([t[--tl], 0]);
+                }
             }
+            result.reverse();
+            return result;
         }
 
         let escapeElement = document.createElement("div");
@@ -230,6 +223,7 @@
                 if (v < log.length - 1) {
                     isLast = v == log.length - 2;
                     isFirst = v == 0;
+                    iteration.innerText = isLast ? "Last" : v + 1;
                     if (v > 0) {
                         // Minor fixes for presentation purposes
                         src = log[v][1]
@@ -258,19 +252,38 @@
 
                     comment.innerText = log[v+1][0];
                     
-                    for (let x of [...changes(log[v][1], log[v + 1][1])].reverse()) {
-                        iteration.innerText = isLast ? "Last" : v + 1;
-                        codelen.innerText = x[0].length;
-                        
-                        code.innerHTML = `<span style='color:rgb(0,211,211)'>${
-                            escapeHack(x[0].substring(0, x[1]))
-                            }</span><span style='color:lightgray'><span style='background-color:${
-                            (x[2] || isLast) ? "red" : "rgb(0,211,211)"}'>${
-                            escapeHack(x[0][x[1]])
-                            }</span>${escapeHack(x[0].substring(x[1]+1))}</span>`;
+                    const changes = changes3(log[v + 1][1], log[v][1]);
+                    for (i = 0; i < changes.length; ++i) {
 
-                        await sleep(x[2] && !isFirst && !isLast ? delay : delay / 20);
-                        
+                        html = "";
+                        len = 0;
+                        chunks = [];
+                        for (j = 0; j < changes.length; ++j) {
+                            let ins = changes[j][1] % 3 === 1;
+                            let del = changes[j][1] % 3 === 2;
+                            if ((ins && j > i) || (del && j < i)) continue;
+                            if (i == changes.length - 1 && j == i && del) continue;
+
+                            bc = (i == j && i < changes.length - 1) ? "white" : ins ? "rgb(35,35,35)" : del ? "rgb(128,29,29)" : "black";
+                            fc = (i == j && i < changes.length - 1) ? "black" : ins ? "rgb(26,238,58)" : del ? "rgb(235,150,150" : "rgb(211,211,211)";
+                            val = changes[j][0];
+
+                            if (chunks.length == 0 || chunks[chunks.length-1][1] != fc || chunks[chunks.length-1][2] != bc)
+                            {
+                                chunks.push([val,fc,bc]);
+                            }
+                            else
+                            {
+                                chunks[chunks.length-1][0]+=val;
+                            }
+                            len++;
+                        }
+
+                        for (chunk of chunks)
+                        {
+                            html += `<span style='background-color:${chunk[2]}; color: ${chunk[1]};'>${escapeHack(chunk[0])}</span>`;
+                        }
+
                         if (changed) {
                             break;
                         }
@@ -278,6 +291,13 @@
                         while (paused) {
                             await sleep(100);
                         }
+
+                        code.innerHTML = html;
+                        codelen.innerText = len;
+
+                        ms = isFirst || isLast || changes[i][1] === 0 ? delay / 20 : changes[i][1] < 3 ? delay : delay/2;
+                        if (i == 0) ms += 1000;
+                        await sleep (ms);
                     }
 
                     if (changed) {
@@ -288,15 +308,10 @@
                         await sleep(100);
                     }
 
-                    for (let c = 0; c < 212; c += 2) {
-                        code.innerHTML = `<span style='color:rgb(${c}, 211, 211)'>${escapeHack(log[v + 1][1])}</span>&nbsp;`;
-                        await sleep(0);
-                    }
-
                     v++;
                 }
 
-                await sleep(500);
+                await sleep(1000);
             }
         }
 
